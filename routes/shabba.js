@@ -11,13 +11,8 @@ const BOT_TOKEN = "5805445041:AAEyEOk6JELDr7SLFORniePoZsusK9peChs";
 const CHAT_ID = "1527776859";
 const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
 
-// Enable CORS for all routes
+// Enable CORS
 router.use(cors());
-// Or for specific origins:
-// router.use(cors({
-//     origin: ['http://127.0.0.1:5500', 'http://localhost:3000'],
-//     credentials: true
-// }));
 
 // Handle OPTIONS preflight requests
 router.options('*', cors());
