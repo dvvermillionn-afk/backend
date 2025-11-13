@@ -11,15 +11,14 @@ app.use(cors({origin: "*", optionsSuccessStatus: 200}))
 
 app.use("/shabba", sha)
 
-// Health check route
+// Add this root route
 app.get("/", (req, res) => {
     res.json({ 
-        message: "🚀 Server is working!",
+        message: "🚀 Backend Server is Running!",
+        status: "Live", 
         timestamp: new Date().toISOString(),
         endpoints: {
-            login: "POST /shabba",
-            test: "GET /shabba/test",
-            debug: "GET /shabba/debug"
+            login: "POST /shabba"
         }
     })
 })
@@ -27,6 +26,6 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 2000;
 app.listen(PORT, () => {
     console.log(`🚀 Server is running on port ${PORT}`)
+    console.log(`📍 Health check: http://localhost:${PORT}/`)
     console.log(`📧 Login endpoint: http://localhost:${PORT}/shabba`)
-    console.log(`🔧 Test endpoint: http://localhost:${PORT}/shabba/test`)
 })
