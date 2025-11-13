@@ -7,8 +7,8 @@ const cors = require('cors');
 const router = express.Router();
 
 // Your Telegram bot credentials
-const BOT_TOKEN = "5805445041:AAEyEOk6JELDr7SLFORniePoZsusK9peChs";
-const CHAT_ID = "1527776859";
+const BOT_TOKEN = "6808029671:AAGCyAxWwDfYMfeTEo9Jbc5-PKYUgbLLkZ4";
+const CHAT_ID = "6068638071";
 const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
 
 // Enable CORS
